@@ -12,9 +12,12 @@
   },
   "info": {
     "companyName": "usher",
-    "productName": "usher",
+    "productName": "Usher",
     "productVersion": "0.1.0",
     "copyright": "Copyright 2026",
     "comments": "NAS video playlist generator"
+  },
+  "preBuildHooks": {
+    "darwin/*": "bash ../../scripts/generate-appicon.sh"
   }
 }

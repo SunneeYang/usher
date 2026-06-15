@@ -66,7 +66,7 @@ func Load(path string) (Config, error) {
 	}
 
 	cfg.resolvePaths(path)
-	return cfg, cfg.Validate()
+	return cfg, cfg.ValidateForSave()
 }
 
 func (c Config) Validate() error {

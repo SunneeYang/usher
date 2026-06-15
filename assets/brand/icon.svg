@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="128" y1="96" x2="896" y2="928" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2e2e38"/>
+      <stop stop-color="#121214"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="420" y1="300" x2="760" y2="720" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8eb0ff"/>
+      <stop stop-color="#5b8cff"/>
+    </linearGradient>
+    <linearGradient id="accent-dim" x1="260" y1="360" x2="560" y2="660" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5b8cff" stop-opacity="0.55"/>
+      <stop stop-color="#5b8cff" stop-opacity="0.22"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="226" fill="url(#bg)"/>
+  <rect x="52" y="52" width="920" height="920" rx="196" stroke="#ffffff" stroke-opacity="0.07" stroke-width="6"/>
+  <rect x="248" y="372" width="292" height="52" rx="26" fill="url(#accent-dim)"/>
+  <rect x="248" y="486" width="228" height="52" rx="26" fill="url(#accent-dim)" fill-opacity="0.9"/>
+  <rect x="248" y="600" width="260" height="52" rx="26" fill="url(#accent-dim)" fill-opacity="0.75"/>
+  <path d="M548 318L772 512L548 706V318Z" fill="url(#accent)"/>
+  <path d="M548 318L772 512L548 706V318Z" fill="#ffffff" fill-opacity="0.18"/>
+  <circle cx="512" cy="512" r="360" stroke="#5b8cff" stroke-opacity="0.12" stroke-width="8"/>
+</svg>

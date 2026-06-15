@@ -61,6 +61,44 @@ func TestLoadOrDefaultCreatesFile(t *testing.T) {
 	}
 }
 
+func TestLoadEmptySourceDirs(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "config.yaml")
+	content := `source_dirs: []
+output_file: playlist.m3u
+video_extensions:
+  - .mp4
+`
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg, err := Load(path)
+	if err != nil {
+		t.Fatalf("Load() error = %v", err)
+	}
+	if len(cfg.SourceDirs) != 0 {
+		t.Fatalf("SourceDirs = %#v, want empty", cfg.SourceDirs)
+	}
+}
+
+func TestLoadOrDefaultReloadsEmptySourceDirs(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "config.yaml")
+
+	if _, err := LoadOrDefault(path); err != nil {
+		t.Fatalf("first LoadOrDefault() error = %v", err)
+	}
+
+	cfg, err := LoadOrDefault(path)
+	if err != nil {
+		t.Fatalf("second LoadOrDefault() error = %v", err)
+	}
+	if cfg.SourceDirs == nil {
+		t.Fatal("SourceDirs is nil")
+	}
+}
+
 func TestValidateErrors(t *testing.T) {
 	tests := []struct {
 		name string

@@ -364,9 +364,12 @@ function render() {
   app.innerHTML = `
     <div class="app-shell">
       <header class="titlebar">
-        <div class="titlebar-row">
-          <h1>usher</h1>
-          <p id="subtitle" title="${escapeAttr(subtitleText())}">${escapeHtml(subtitleText())}</p>
+        <div class="titlebar-brand">
+          <img class="titlebar-logo" src="/logo-mark.svg" width="28" height="28" alt="" />
+          <div class="titlebar-row">
+            <h1>usher</h1>
+            <p id="subtitle" title="${escapeAttr(subtitleText())}">${escapeHtml(subtitleText())}</p>
+          </div>
         </div>
       </header>
 

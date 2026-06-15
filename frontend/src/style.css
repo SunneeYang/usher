@@ -58,6 +58,24 @@ header.titlebar {
   margin: 0;
 }
 
+.titlebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.titlebar-logo {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.titlebar-row {
+  min-width: 0;
+}
+
 .titlebar-row h1 {
   margin: 0;
   font-size: 20px;
