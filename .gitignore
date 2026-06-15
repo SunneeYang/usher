@@ -1,5 +1,6 @@
 /usher
 usher
+dist/
 *.m3u
 config.yaml
 .usher-scan-cache.json
