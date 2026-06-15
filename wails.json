@@ -1,0 +1,20 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "usher",
+  "outputfilename": "usher",
+  "frontend:install": "npm install",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "SunneeYang",
+    "email": ""
+  },
+  "info": {
+    "companyName": "usher",
+    "productName": "usher",
+    "productVersion": "0.1.0",
+    "copyright": "Copyright 2026",
+    "comments": "NAS video playlist generator"
+  }
+}

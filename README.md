@@ -14,16 +14,33 @@
 
 ## 快速开始
 
-### 环境要求
+### 桌面版（推荐）
 
-- Go 1.22+
+图形界面，无需编辑 YAML。
 
-### 安装
+**环境要求：** Go 1.22+、[Wails v2](https://wails.io/docs/gettingstarted/installation)、Node.js
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/SunneeYang/usher.git
 cd usher
-go build -o usher .
+wails build
+open build/bin/usher.app
+```
+
+配置保存在 `~/Library/Application Support/usher/config.yaml`。
+
+开发模式（热重载）：
+
+```bash
+wails dev
+```
+
+### 命令行版
+
+**环境要求：** Go 1.22+
+
+```bash
+go build -o usher-cli ./cmd/usher
 ```
 
 ### 配置
@@ -52,11 +69,11 @@ scan_cache: .usher-scan-cache.json
 ### 运行
 
 ```bash
-./usher
-./usher -config /path/to/config.yaml
-./usher -version
-./usher -perf         # 开启详细性能日志
-./usher -fresh        # 忽略缓存，全量重新扫描
+./usher-cli
+./usher-cli -config /path/to/config.yaml
+./usher-cli -version
+./usher-cli -perf         # 开启详细性能日志
+./usher-cli -fresh        # 忽略缓存，全量重新扫描
 ```
 
 ## 配置说明
@@ -166,21 +183,31 @@ video_extensions:
 
 ```
 usher/
-├── main.go                 # CLI 入口
-├── config.yaml.example     # 配置示例
+├── main.go                 # Wails 桌面入口
+├── app.go                  # 桌面 API（绑定前端）
+├── cmd/usher/              # CLI 入口
+├── frontend/               # 桌面 UI (Vite + vanilla JS)
+├── wails.json
 ├── internal/
-│   ├── config/             # 配置加载与校验
-│   ├── scanner/            # 目录扫描、去重、排序/洗牌
-│   └── playlist/           # M3U 写入
+│   ├── app/                # CLI / 桌面共享业务逻辑
+│   ├── config/
+│   ├── scanner/
+│   └── playlist/
 └── go.mod
 ```
 
 ## 开发
 
 ```bash
-# 运行测试
+# 测试
 go test ./...
 
-# 构建
-go build -o usher .
+# CLI
+go build -o usher-cli ./cmd/usher
+
+# 桌面（开发）
+wails dev
+
+# 桌面（发布构建）
+wails build
 ```

@@ -1,6 +1,10 @@
 /usher
-usher
+/usher-cli
 dist/
+build/bin/
+frontend/node_modules/
+frontend/dist/
+frontend/wailsjs/
 *.m3u
 config.yaml
 .usher-scan-cache.json

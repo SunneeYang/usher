@@ -45,6 +45,22 @@ func TestDefaultVideoExtensions(t *testing.T) {
 	}
 }
 
+func TestLoadOrDefaultCreatesFile(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "nested", "config.yaml")
+
+	cfg, err := LoadOrDefault(path)
+	if err != nil {
+		t.Fatalf("LoadOrDefault() error = %v", err)
+	}
+	if cfg.OutputFile != "playlist.m3u" {
+		t.Fatalf("cfg = %#v", cfg)
+	}
+	if _, err := os.Stat(path); err != nil {
+		t.Fatalf("config file not created: %v", err)
+	}
+}
+
 func TestValidateErrors(t *testing.T) {
 	tests := []struct {
 		name string
