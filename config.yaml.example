@@ -1,0 +1,11 @@
+source_dirs:
+  - /path/to/movies
+  - /path/to/tv
+
+output_file: playlist.m3u
+shuffle: false
+sort: true
+skip_hidden: true
+scan_workers: 32
+scan_cache: .usher-scan-cache.json
+cache_verify: none   # none=极速信任缓存 | mtime=逐个校验目录(慢但自动感知变更)
