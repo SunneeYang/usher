@@ -11,7 +11,7 @@ import (
 	"github.com/hcm-b0677/usher/internal/scanner"
 )
 
-const Version = "0.1.0"
+const Version = "0.2.0"
 
 type Service struct {
 	ConfigPath string
