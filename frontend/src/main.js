@@ -40,8 +40,8 @@ const state = {
 
 const app = document.getElementById("app");
 
-const WINDOW_MIN = { w: 380, h: 420 };
-const WINDOW_DEFAULT_W = 680;
+const WINDOW_MIN = { w: 560, h: 480 };
+const WINDOW_DEFAULT_W = 1000;
 
 function setLayoutMode(mode) {
   document.body.classList.toggle("layout-natural", mode === "natural");
@@ -62,16 +62,8 @@ function measureShellHeight() {
 
   push(shell, "height", "auto");
 
-  const appBody = shell.querySelector(".app-body");
-  if (appBody) {
-    push(appBody, "flex", "none");
-    push(appBody, "minHeight", "auto");
-    push(appBody, "overflow", "visible");
-    push(appBody, "height", "auto");
-  }
-
   for (const el of shell.querySelectorAll(
-    ".app-panel, .card--dirs, .card--result, #result-body, .dir-list"
+    ".config-row, .result-section, .card--dirs, .card--result, #result-body, .dir-list"
   )) {
     push(el, "flex", "none");
     push(el, "minHeight", "auto");
@@ -239,30 +231,34 @@ function renderToolbar(scanning) {
     </section>`;
 }
 
-function renderSourceGrid(sources) {
+function renderSourceGrid(sources, total) {
   if (!sources?.length) {
     return "";
   }
 
+  const denom =
+    total || sources.reduce((sum, s) => sum + (s.videos || 0), 0) || 1;
+
   return `
     <div class="source-grid">
       ${sources
-        .map(
-          (s) => `
+        .map((s) => {
+          const pct = Math.max(2, Math.round(((s.videos || 0) / denom) * 100));
+          return `
         <article class="source-card">
           <div class="source-card-head">
             <h3>${escapeHtml(s.label)}</h3>
             <span class="source-card-count">${formatNumber(s.videos)}</span>
           </div>
-          <p class="meta">${s.subdirs} 个子目录</p>
+          <div class="ratio-bar"><span class="ratio-fill" style="width:${pct}%"></span></div>
           <div class="chips">
             ${(s.topDirs || [])
-              .slice(0, 4)
+              .slice(0, 5)
               .map((d) => `<span class="chip">${escapeHtml(d.name)} · ${d.videos}</span>`)
               .join("")}
           </div>
-        </article>`
-        )
+        </article>`;
+        })
         .join("")}
     </div>`;
 }
@@ -287,7 +283,7 @@ function renderResultBody(result) {
   return `
     ${warning}
     ${change.summary ? `<p class="meta result-summary">${escapeHtml(change.summary)}</p>` : ""}
-    ${renderSourceGrid(result.sources)}
+    ${renderSourceGrid(result.sources, result.videoCount)}
     ${
       added.length
         ? `<details class="change-details">
@@ -309,7 +305,11 @@ function renderResultBody(result) {
               .join("")}</ul>
           </details>`
         : ""
-    }`;
+    }
+    <div class="result-status">
+      <span class="meta">输出路径：${escapeHtml(result.outputFile || state.config.outputFile)}</span>
+      <span class="meta">已写入 ${formatNumber(result.videoCount)} 条</span>
+    </div>`;
 }
 
 function renderPlayerOptions(config) {
@@ -324,6 +324,21 @@ function renderPlayerOptions(config) {
     .join("");
 }
 
+function renderScanCard(config, scanning) {
+  const disabled = scanning ? "disabled" : "";
+
+  return `
+    <div class="options options--scan">
+      <label><input type="checkbox" id="shuffle" ${config.shuffle ? "checked" : ""} ${disabled} /> 随机打乱</label>
+      <label><input type="checkbox" id="skip-hidden" ${config.skipHidden ? "checked" : ""} ${disabled} /> 跳过隐藏文件</label>
+    </div>
+    <div class="field">
+      <label>并行线程</label>
+      <input type="number" id="scan-workers" min="1" max="64" value="${config.scanWorkers}" ${disabled} />
+    </div>
+    ${renderAdvancedPanel(config, scanning)}`;
+}
+
 function renderAdvancedPanel(config, scanning) {
   const disabled = scanning ? "disabled" : "";
   const open = state.showAdvanced ? "open" : "";
@@ -332,15 +347,7 @@ function renderAdvancedPanel(config, scanning) {
     <details class="advanced-panel" id="advanced-panel" ${open}>
       <summary id="toggle-more">更多选项</summary>
       <div class="advanced-body">
-        <div class="options options--advanced">
-          <label><input type="checkbox" id="shuffle" ${config.shuffle ? "checked" : ""} ${disabled} /> 随机打乱</label>
-          <label><input type="checkbox" id="skip-hidden" ${config.skipHidden ? "checked" : ""} ${disabled} /> 跳过隐藏文件</label>
-          <label><input type="checkbox" id="fresh" ${disabled} /> 全量重扫 (-fresh)</label>
-        </div>
-        <div class="field">
-          <label>并行扫描线程 (scan_workers)</label>
-          <input type="number" id="scan-workers" min="1" max="64" value="${config.scanWorkers}" ${disabled} />
-        </div>
+        <label class="adv-check"><input type="checkbox" id="fresh" ${disabled} /> 全量重扫 (-fresh)</label>
         <div class="field">
           <label>扫描缓存路径</label>
           <input type="text" id="scan-cache" value="${escapeAttr(config.scanCache)}" ${disabled} />
@@ -378,68 +385,70 @@ function render() {
         ${renderToolbar(scanning)}
       </div>
 
-      <div class="app-body">
-        <div class="app-panel app-panel--config">
-          <section class="card card--dirs">
-            <h2>视频目录</h2>
-            <ul class="dir-list" id="dir-list">
-              ${
-                sourceDirs.length === 0
-                  ? '<li class="dir-empty">尚未添加目录</li>'
-                  : sourceDirs
-                      .map(
-                        (dir, i) => `
-                <li>
-                  <span class="dir-path">${escapeHtml(dir)}</span>
-                  <button class="danger" data-remove="${i}" ${scanning ? "disabled" : ""}>移除</button>
-                </li>`
-                      )
-                      .join("")
-              }
-            </ul>
-          </section>
+      <div class="config-row">
+        <section class="card card--dirs">
+          <h2>视频目录</h2>
+          <ul class="dir-list" id="dir-list">
+            ${
+              sourceDirs.length === 0
+                ? '<li class="dir-empty">尚未添加目录</li>'
+                : sourceDirs
+                    .map(
+                      (dir, i) => `
+              <li>
+                <span class="dir-path">${escapeHtml(dir)}</span>
+                <button class="danger" data-remove="${i}" ${scanning ? "disabled" : ""}>移除</button>
+              </li>`
+                    )
+                    .join("")
+            }
+          </ul>
+        </section>
 
-          <section class="card card--output">
-            <h2>输出</h2>
-            <div class="field">
-              <label>播放列表路径</label>
-              <div class="row">
-                <input type="text" id="output-file" value="${escapeAttr(config.outputFile)}" ${scanning ? "disabled" : ""} />
-                <button class="secondary" id="pick-output" ${scanning ? "disabled" : ""}>选择</button>
-              </div>
+        <section class="card card--output">
+          <h2>输出</h2>
+          <div class="field">
+            <label>播放列表路径</label>
+            <div class="row">
+              <input type="text" id="output-file" value="${escapeAttr(config.outputFile)}" ${scanning ? "disabled" : ""} />
+              <button class="secondary" id="pick-output" ${scanning ? "disabled" : ""}>选择</button>
             </div>
-            <div class="field">
-              <label>播放器</label>
-              <div class="row">
-                <select id="player" class="select" ${scanning ? "disabled" : ""}>
-                  ${renderPlayerOptions(config)}
-                </select>
-                ${
-                  showCustomPlayer
-                    ? `<button class="secondary" id="pick-player" ${scanning ? "disabled" : ""}>选择应用</button>`
-                    : ""
-                }
-              </div>
+          </div>
+          <div class="field">
+            <label>播放器</label>
+            <div class="row">
+              <select id="player" class="select" ${scanning ? "disabled" : ""}>
+                ${renderPlayerOptions(config)}
+              </select>
               ${
-                showCustomPlayer && config.playerApp
-                  ? `<p class="meta player-app-path">${escapeHtml(config.playerApp)}</p>`
+                showCustomPlayer
+                  ? `<button class="secondary" id="pick-player" ${scanning ? "disabled" : ""}>选择应用</button>`
                   : ""
               }
             </div>
-            <div class="options options--quick">
-              <label><input type="checkbox" id="sort" ${config.sort ? "checked" : ""} ${scanning ? "disabled" : ""} /> 按路径排序</label>
-              <label><input type="checkbox" id="open-after-scan" ${config.openAfterScan ? "checked" : ""} ${scanning ? "disabled" : ""} /> 生成后自动打开</label>
-            </div>
-            ${renderAdvancedPanel(config, scanning)}
-          </section>
-        </div>
+            ${
+              showCustomPlayer && config.playerApp
+                ? `<p class="meta player-app-path">${escapeHtml(config.playerApp)}</p>`
+                : ""
+            }
+          </div>
+          <div class="options options--quick">
+            <label><input type="checkbox" id="sort" ${config.sort ? "checked" : ""} ${scanning ? "disabled" : ""} /> 按路径排序</label>
+            <label><input type="checkbox" id="open-after-scan" ${config.openAfterScan ? "checked" : ""} ${scanning ? "disabled" : ""} /> 生成后自动打开</label>
+          </div>
+        </section>
 
-        <div class="app-panel app-panel--result">
-          <section class="card card--result" id="result-card">
-            <h2>扫描结果</h2>
-            <div id="result-body">${renderResultBody(lastResult)}</div>
-          </section>
-        </div>
+        <section class="card card--scan">
+          <h2>扫描信息</h2>
+          ${renderScanCard(config, scanning)}
+        </section>
+      </div>
+
+      <div class="result-section">
+        <section class="card card--result" id="result-card">
+          <h2>扫描结果</h2>
+          <div id="result-body">${renderResultBody(lastResult)}</div>
+        </section>
       </div>
     </div>
   `;
